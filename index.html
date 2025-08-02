@@ -1,154 +1,334 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Moral Dilemma Quiz</title>
-  <style>
-    body {
-      background: linear-gradient(to right, #2c3e50, #4ca1af);
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #fff;
-      padding: 30px;
-      text-align: center;
-    }
-    .container {
-      max-width: 800px;
-      margin: auto;
-      background-color: rgba(0, 0, 0, 0.6);
-      padding: 30px;
-      border-radius: 20px;
-      box-shadow: 0 0 20px rgba(0,0,0,0.4);
-    }
-    .question {
-      margin-bottom: 25px;
-    }
-    .question p {
-      font-size: 1.2em;
-    }
-    button {
-      margin: 5px;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      background: #16a085;
-      color: #fff;
-      font-size: 1em;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #1abc9c;
-    }
-    .result {
-      margin-top: 30px;
-      font-size: 1.6em;
-      font-weight: bold;
-    }
-    .signature {
-      margin-top: 40px;
-      font-size: 0.9em;
-      color: #ccc;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Mind Quiz</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f2f5;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+        }
+
+        #quiz-container {
+            background-color: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+            overflow: hidden;
+            padding: 40px;
+        }
+
+        #question-counter {
+            font-size: 1em;
+            color: #888;
+            margin-bottom: 10px;
+        }
+
+        #question {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+
+        #answers-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .btn {
+            background-color: #5c67f2;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 15px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: left;
+        }
+
+        .btn:hover:not(:disabled) {
+            background-color: #4a54c2;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background-color: #a5a5a5;
+            cursor: not-allowed;
+            color: #e0e0e0;
+        }
+        
+        .btn.selected {
+            background-color: #2c3a9e;
+            box-shadow: 0 0 10px rgba(44, 58, 158, 0.5);
+        }
+
+        #result-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        #result-content {
+            background-color: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        #result-title {
+            font-size: 1.8em;
+            font-weight: 600;
+            color: #5c67f2;
+            margin-bottom: 15px;
+        }
+
+        #result-description {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #555;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ultimate Moral Dilemma Quiz</h1>
-    <div id="quiz"></div>
-    <button onclick="calculateResult()">Submit Answers</button>
-    <div class="result" id="result"></div>
-    <div class="signature">Created by Mudasir</div>
-  </div>  <script>
-    const dilemmas = [
-      {
-        question: "A train is headed toward five people. Do you divert it, killing your own child to save them?",
-        options: ["Divert and kill your child", "Don’t divert and let five die"],
-        score: [1, -1]
-      },
-      {
-        question: "You can expose a powerful truth that will cause riots. Do you reveal it?",
-        options: ["Expose the truth", "Keep it hidden for peace"],
-        score: [1, -1]
-      },
-      {
-        question: "Your best friend is guilty. Do you lie to protect them in court?",
-        options: ["Lie and protect them", "Tell the truth and let them face justice"],
-        score: [-1, 1]
-      },
-      {
-        question: "You can accept a bribe to save your family. Do you take it?",
-        options: ["Accept the bribe", "Refuse and follow the law"],
-        score: [-1, 1]
-      },
-      {
-        question: "You can take credit for someone’s heroism to inspire millions. Do you do it?",
-        options: ["Take credit", "Tell the truth"],
-        score: [-1, 1]
-      },
-      {
-        question: "You can end a loved one’s suffering through illegal means. Do you do it?",
-        options: ["End the suffering", "Let them live in pain legally"],
-        score: [1, -1]
-      },
-      {
-        question: "You can punish a person for a crime they will commit in the future. Do you act now?",
-        options: ["Punish now", "Wait for it to happen"],
-        score: [-1, 1]
-      },
-      {
-        question: "You must choose between saving your child or a scientist with a cure for cancer. Who do you save?",
-        options: ["Save my child", "Save the scientist"],
-        score: [-1, 1]
-      },
-      {
-        question: "You must condemn one innocent person to save the entire world. Do you do it?",
-        options: ["Condemn the innocent", "Refuse to sacrifice them"],
-        score: [-1, 1]
-      },
-      {
-        question: "You can delete painful memories from your past and be happy. Do you erase them?",
-        options: ["Erase the memories", "Keep them to learn from pain"],
-        score: [-1, 1]
-      }
-    ];
 
-    const scores = [];
-    const quizDiv = document.getElementById("quiz");
+    <div id="quiz-container">
+        <div id="question-counter"></div>
+        <h2 id="question">Loading your mind-bending quiz...</h2>
+        <div id="answers-container">
+            </div>
+    </div>
 
-    dilemmas.forEach((d, i) => {
-      const div = document.createElement("div");
-      div.className = "question";
-      div.innerHTML = `<p>${i + 1}. ${d.question}</p>`;
+    <div id="result-popup">
+        <div id="result-content">
+            <h3 id="result-title"></h3>
+            <p id="result-description"></p>
+        </div>
+    </div>
 
-      d.options.forEach((opt, j) => {
-        const btn = document.createElement("button");
-        btn.textContent = opt;
-        btn.onclick = () => {
-          scores[i] = d.score[j];
-          btn.parentNode.querySelectorAll('button').forEach(b => b.disabled = true);
-          btn.style.background = '#555';
+    <script>
+        const quizData = [
+            {
+                question: "A sudden, heavy rain starts. You're without an umbrella. What's your very first thought?",
+                answers: [
+                    { text: "Find the nearest shop to stay dry.", profile: 'realist' },
+                    { text: "Feel the rain, maybe even enjoy it.", profile: 'idealist' },
+                    { text: "I should have checked the weather.", profile: 'analyst' },
+                    { text: "I hope other people around find shelter.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "You find a beautiful, old key on the sidewalk. What do you do?",
+                answers: [
+                    { text: "Leave it. It's not mine.", profile: 'realist' },
+                    { text: "Imagine it opens a secret treasure chest.", profile: 'idealist' },
+                    { text: "Examine its design and age.", profile: 'analyst' },
+                    { text: "Worry that someone is looking for it.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "If you had to choose a superpower, which one appeals most to you?",
+                answers: [
+                    { text: "The ability to build or fix anything instantly.", profile: 'realist' },
+                    { text: "The ability to fly and see the world.", profile: 'idealist' },
+                    { text: "The ability to know the history of any object.", profile: 'analyst' },
+                    { text: "The ability to feel what others are feeling.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "You are given an empty room to decorate. What's your first step?",
+                answers: [
+                    { text: "Measure the room and plan a budget.", profile: 'realist' },
+                    { text: "Think about a color that makes me feel happy.", profile: 'idealist' },
+                    { text: "Draw different layouts to see what's best.", profile: 'analyst' },
+                    { text: "Imagine how guests will feel in the room.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "When someone tells you a secret, you mostly feel...",
+                answers: [
+                    { text: "The responsibility to keep it safe.", profile: 'realist' },
+                    { text: "The excitement of the story.", profile: 'idealist' },
+                    { text: "Curious about why they told me.", profile: 'analyst' },
+                    { text: "The weight of their trust and emotions.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "Which of these sounds like the most enjoyable weekend?",
+                answers: [
+                    { text: "Organizing your home or finishing a project.", profile: 'realist' },
+                    { text: "Visiting an art museum or a live concert.", profile: 'idealist' },
+                    { text: "Solving a complex puzzle or a strategy game.", profile: 'analyst' },
+                    { text: "Having a long, deep talk with a friend.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "You hear a strange noise in your house at night. You immediately...",
+                answers: [
+                    { text: "Think of a logical reason, like the wind.", profile: 'realist' },
+                    { text: "Imagine all the wild possibilities.", profile: 'idealist' },
+                    { text: "Listen carefully to find the sound's source.", profile: 'analyst' },
+                    { text: "Feel a sudden wave of fear for your safety.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "When you make a mistake, what does your inner voice say?",
+                answers: [
+                    { text: "“Okay, how do I fix this now?”", profile: 'realist' },
+                    { text: "“Oh no, I feel so bad about this.”", profile: 'idealist' },
+                    { text: "“Let's see where exactly I went wrong.”", profile: 'analyst' },
+                    { text: "“I hope this didn't cause problems for others.”", profile: 'empath' }
+                ]
+            },
+            {
+                question: "While watching a movie, what do you pay most attention to?",
+                answers: [
+                    { text: "If the story makes logical sense.", profile: 'realist' },
+                    { text: "The beautiful scenes and the music.", profile: 'idealist' },
+                    { text: "The small clues and hints about the plot.", profile: 'analyst' },
+                    { text: "How the characters feel and relate to each other.", profile: 'empath' }
+                ]
+            },
+            {
+                question: "A friend is very upset. What is your first instinct?",
+                answers: [
+                    { text: "Offer them practical advice to solve the problem.", profile: 'realist' },
+                    { text: "Try to cheer them up and distract them.", profile: 'idealist' },
+                    { text: "Ask many questions to understand everything.", profile: 'analyst' },
+                    { text: "Just listen and tell them you are there for them.", profile: 'empath' }
+                ]
+            }
+        ];
+
+        const results = {
+            realist: {
+                title: "The Pragmatic Realist",
+                description: "You are grounded in reality. You see things for what they are and focus on what is practical and possible. When faced with a problem, your first instinct is to find a direct and workable solution. You are dependable, efficient, and value common sense."
+            },
+            idealist: {
+                title: "The Creative Idealist",
+                description: "Your mind is a world of imagination and big ideas. You are driven by your feelings and a sense of wonder. You often see the beauty and potential in things that others might miss. You are inspired by art, dreams, and the possibility of a better future."
+            },
+            analyst: {
+                title: "The Analytical Observer",
+                description: "You have a curious and methodical mind. You love to understand how things work, to find patterns, and to solve complex puzzles. You approach situations by gathering information and thinking logically. You are perceptive, thoughtful, and enjoy a good mental challenge."
+            },
+            empath: {
+                title: "The Intuitive Empath",
+                description: "You are highly connected to the world of feelings, both your own and others'. You have a strong intuition and can easily sense the mood of a room or a person. When people have problems, you offer comfort first. You are caring, supportive, and build deep connections."
+            }
         };
-        div.appendChild(btn);
-      });
 
-      quizDiv.appendChild(div);
-    });
+        const questionElement = document.getElementById('question');
+        const answersContainer = document.getElementById('answers-container');
+        const questionCounterElement = document.getElementById('question-counter');
+        const resultPopup = document.getElementById('result-popup');
+        const resultTitle = document.getElementById('result-title');
+        const resultDescription = document.getElementById('result-description');
 
-    function calculateResult() {
-      if (scores.length < dilemmas.length || scores.includes(undefined)) {
-        alert("Answer all questions first!");
-        return;
-      }
+        let currentQuestionIndex = 0;
+        let scores = { realist: 0, idealist: 0, analyst: 0, empath: 0 };
 
-      const total = scores.reduce((a, b) => a + b, 0);
-      let result = "Neutral Person";
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            scores = { realist: 0, idealist: 0, analyst: 0, empath: 0 };
+            showQuestion();
+        }
 
-      if (total >= 8) result = "Altruistic Person";
-      else if (total >= 4) result = "Empathetic Person";
-      else if (total <= -8) result = "Evil Person";
-      else if (total <= -4) result = "Selfish Person";
+        function showQuestion() {
+            resetState();
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionElement.innerText = currentQuestion.question;
+            questionCounterElement.innerText = `Question ${currentQuestionIndex + 1} / ${quizData.length}`;
+            
+            currentQuestion.answers.forEach(answer => {
+                const button = document.createElement('button');
+                button.innerText = answer.text;
+                button.classList.add('btn');
+                button.dataset.profile = answer.profile;
+                button.addEventListener('click', selectAnswer);
+                answersContainer.appendChild(button);
+            });
+        }
 
-      document.getElementById("result").textContent = `You are a ${result}`;
-    }
-  </script></body>
+        function resetState() {
+            while (answersContainer.firstChild) {
+                answersContainer.removeChild(answersContainer.firstChild);
+            }
+        }
+
+        function selectAnswer(e) {
+            const selectedButton = e.target;
+            const profile = selectedButton.dataset.profile;
+            scores[profile]++;
+            
+            // Highlight selected button and disable all
+            Array.from(answersContainer.children).forEach(button => {
+                button.disabled = true;
+                if(button === selectedButton) {
+                    button.classList.add('selected');
+                }
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < quizData.length) {
+                    showQuestion();
+                } else {
+                    showResult();
+                }
+            }, 1000); // Wait 1 second before next question
+        }
+
+        function showResult() {
+            let maxScore = -1;
+            let resultProfile = '';
+            for (const profile in scores) {
+                if (scores[profile] > maxScore) {
+                    maxScore = scores[profile];
+                    resultProfile = profile;
+                }
+            }
+
+            const result = results[resultProfile];
+            resultTitle.innerText = result.title;
+            resultDescription.innerText = result.description;
+            resultPopup.style.display = 'flex';
+        }
+
+        startQuiz();
+    </script>
+</body>
 </html>
